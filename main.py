@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -19,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from engine.autotrade import AutoTradeManager
+from engine.brokers import list_brokers
 from engine.scanner import SignalScanner
 from routers import ai, alerts, autotrade, news, signals
 
@@ -133,6 +135,22 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/api/brokers")
+async def get_brokers():
+    """Brokers soportados por Auto Trade y su disponibilidad según la configuración actual."""
+    ibkr_available = bool(os.getenv("IBKR_HOST"))
+    alpaca_available = bool(os.getenv("ALPACA_API_KEY")) and bool(os.getenv("ALPACA_SECRET_KEY"))
+
+    return {
+        "brokers": list(list_brokers()),
+        "default": "ibkr",
+        "status": {
+            "ibkr": "available" if ibkr_available else "not_configured",
+            "alpaca": "available" if alpaca_available else "not_configured",
+        },
+    }
 
 
 # Sirve el frontend estático (HTML/CSS/JS puro)

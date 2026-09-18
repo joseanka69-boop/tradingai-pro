@@ -71,7 +71,17 @@
           </div>
         </div>
       </div>
-      <div class="panel-view" id="view-stats"></div>
+      <div class="panel-view" id="view-stats">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="text-dim" style="font-size:12px;margin-bottom:8px;">Broker de Auto Trade</div>
+          <div id="broker-selector" style="display:flex;gap:8px;">
+            <button class="btn btn-ghost broker-btn" data-broker="ibkr" style="flex:1;">IBKR</button>
+            <button class="btn btn-ghost broker-btn" data-broker="alpaca" style="flex:1;">Alpaca</button>
+          </div>
+          <div id="broker-status" class="text-dim" style="font-size:11px;margin-top:8px;"></div>
+        </div>
+        <div id="stats-dynamic"></div>
+      </div>
     </div>
   </div>
 </div>

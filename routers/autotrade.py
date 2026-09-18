@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+from engine.brokers import list_brokers
 
 router = APIRouter(prefix="/api/autotrade", tags=["autotrade"])
 
@@ -12,6 +14,14 @@ class RegisterRequest(BaseModel):
     plan: str = "trial"
     qty: int = 1
     symbols: list[str]
+    broker: str = "ibkr"  # "ibkr" | "alpaca"
+
+    @field_validator("broker")
+    @classmethod
+    def validate_broker(cls, value: str) -> str:
+        if value not in list_brokers():
+            raise ValueError(f"Broker no soportado: '{value}'. Válidos: {list_brokers()}")
+        return value
 
 
 class CloseRequest(BaseModel):
@@ -23,7 +33,7 @@ class CloseRequest(BaseModel):
 @router.post("/register")
 async def register(payload: RegisterRequest, request: Request):
     manager = request.app.state.autotrade_manager
-    user = manager.register_user(payload.phone, payload.plan, payload.qty, payload.symbols)
+    user = manager.register_user(payload.phone, payload.plan, payload.qty, payload.symbols, payload.broker)
     return user
 
 

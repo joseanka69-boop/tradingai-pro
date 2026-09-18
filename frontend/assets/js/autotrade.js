@@ -30,6 +30,8 @@ async function fetchUser() {
   }
 }
 
+let selectedBroker = localStorage.getItem("tradingai_broker") || "ibkr";
+
 function renderRegisterForm() {
   document.getElementById("register-section").style.display = "block";
   document.getElementById("panel-section").style.display = "none";
@@ -40,6 +42,18 @@ function renderRegisterForm() {
       <input type="checkbox" value="${sym}" class="symbol-checkbox" /> ${sym}
     </label>
   `).join("");
+
+  document.querySelectorAll(".broker-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.broker === selectedBroker);
+  });
+}
+
+function handleBrokerSelect(broker) {
+  selectedBroker = broker;
+  localStorage.setItem("tradingai_broker", broker);
+  document.querySelectorAll(".broker-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.broker === broker);
+  });
 }
 
 async function handleRegister(e) {
@@ -56,7 +70,7 @@ async function handleRegister(e) {
   const res = await fetch("/api/autotrade/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ phone, plan: "trial", qty, symbols }),
+    body: JSON.stringify({ phone, plan: "trial", qty, symbols, broker: selectedBroker }),
   });
   const user = await res.json();
   setUserId(user.user_id);
@@ -72,7 +86,7 @@ function renderStatus(user) {
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-size:20px;font-weight:700;">${modeLabel}</div>
-          <div class="text-dim" style="font-size:13px;">Plan: ${user.plan}</div>
+          <div class="text-dim" style="font-size:13px;">Plan: ${user.plan} · Broker: ${(user.broker || "ibkr").toUpperCase()}</div>
         </div>
         <div class="text-center">
           <div style="font-size:24px;font-weight:800;color:var(--accent-2);">${days}</div>
@@ -219,6 +233,9 @@ async function refreshPanel() {
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("register-form").addEventListener("submit", handleRegister);
+  document.querySelectorAll(".broker-btn").forEach((btn) => {
+    btn.addEventListener("click", () => handleBrokerSelect(btn.dataset.broker));
+  });
   refreshPanel();
   setInterval(refreshPanel, 15000);
 });

@@ -100,3 +100,6 @@
 }
 .top-header .logo { font-weight: 800; }
 .top-header .logo span { color: var(--accent); }
+
+.broker-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.broker-btn[data-status="not_configured"]::after { content: " •"; color: var(--warning); }

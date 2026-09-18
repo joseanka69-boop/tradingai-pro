@@ -1,12 +1,14 @@
 """
-Gestión de Auto Trade: modo Paper (simulado) y modo Real (IBKR).
+Gestión de Auto Trade: modo Paper (simulado) y modo Real (vía broker).
 
-- Modo PAPER: no requiere IBKR. Simula la ejecución con los precios reales
-  que entrega el scanner y calcula el P&L usando el multiplicador correcto
-  de cada instrumento (NQ=$20/pt, MNQ=$2/pt, acciones=$1/acción, crypto=$1/u).
+- Modo PAPER: no requiere ningún broker. Simula la ejecución con los precios
+  reales que entrega el scanner y calcula el P&L usando el multiplicador
+  correcto de cada instrumento (NQ=$20/pt, MNQ=$2/pt, acciones=$1/acción,
+  crypto=$1/u).
 - Modo REAL: solo se activa si AUTOTRADE_MODE=real en el .env. Envía
-  bracket orders (entrada + Stop Loss + Take Profit en una sola orden) a
-  IBKR real (puerto 7496).
+  bracket orders (entrada + Stop Loss + Take Profit) al broker que el
+  usuario eligió al registrarse ("ibkr" o "alpaca") a través de
+  engine.brokers.get_broker().
 
 Los usuarios se guardan en data/autotrade_users.json. Cada usuario nuevo
 arranca con un trial gratuito de 30 días en modo Paper.
@@ -23,6 +25,7 @@ from pathlib import Path
 from typing import Optional
 
 from engine import whatsapp
+from engine.brokers import get_broker
 from engine.scanner import Signal, should_exit
 
 logger = logging.getLogger("tradingai.autotrade")
@@ -58,6 +61,7 @@ class User:
     mode: str  # "paper" | "real"
     created_at: str
     trial_ends_at: str
+    broker: str = "ibkr"  # "ibkr" | "alpaca" — broker usado cuando mode efectivo es "real"
     open_positions: dict = field(default_factory=dict)   # symbol -> Position.to_dict()
     closed_trades: list = field(default_factory=list)
 
@@ -95,7 +99,7 @@ class AutoTradeManager:
     # ------------------------------------------------------------------ #
     # Gestión de usuarios
     # ------------------------------------------------------------------ #
-    def register_user(self, phone: str, plan: str, qty: int, symbols: list[str]) -> dict:
+    def register_user(self, phone: str, plan: str, qty: int, symbols: list[str], broker: str = "ibkr") -> dict:
         user_id = str(uuid.uuid4())
         now = _now()
         user = User(
@@ -107,6 +111,7 @@ class AutoTradeManager:
             mode="paper",  # el trial siempre arranca en paper
             created_at=now.isoformat(),
             trial_ends_at=(now + timedelta(days=TRIAL_DAYS)).isoformat(),
+            broker=broker,
         )
         self.users[user_id] = user.to_dict()
         _save_users(self.users)
@@ -168,7 +173,8 @@ class AutoTradeManager:
         )
 
         if mode == "real":
-            self._place_ibkr_bracket_order(signal, qty)
+            broker = get_broker(user.get("broker", "ibkr"))
+            broker.place_order(signal.symbol, signal.direction, qty, signal.stop_loss, signal.take_profit)
 
         user["open_positions"][signal.symbol] = position.to_dict()
 
@@ -213,7 +219,8 @@ class AutoTradeManager:
         user["closed_trades"].append(trade_record)
 
         if mode == "real":
-            self._close_ibkr_position(symbol)
+            broker = get_broker(user.get("broker", "ibkr"))
+            broker.close_position(symbol, open_pos["qty"], open_pos["direction"])
 
         await whatsapp.send_exit_alert(
             user["phone"], symbol=symbol, direction=open_pos["direction"], mode=mode,
@@ -240,55 +247,3 @@ class AutoTradeManager:
         if position["direction"] == "SHORT":
             diff = -diff
         return diff * multiplier * qty
-
-    # ------------------------------------------------------------------ #
-    # Ejecución real vía IBKR (bracket orders)
-    # ------------------------------------------------------------------ #
-    def _place_ibkr_bracket_order(self, signal: Signal, qty: int) -> None:
-        try:
-            from ib_insync import IB, MarketOrder, Stock, ContFuture
-
-            ib = IB()
-            ib.connect(
-                os.getenv("IBKR_HOST", "127.0.0.1"),
-                7496,  # puerto de cuenta real
-                clientId=int(os.getenv("IBKR_CLIENT_ID", "1")),
-                timeout=4,
-            )
-
-            if signal.symbol in ("NQ", "MNQ"):
-                contract = ContFuture(signal.symbol, exchange="CME")
-            else:
-                contract = Stock(signal.symbol, "SMART", "USD")
-            ib.qualifyContracts(contract)
-
-            action = "BUY" if signal.direction == "LONG" else "SELL"
-            bracket = ib.bracketOrder(
-                action, qty,
-                limitPrice=signal.price,
-                takeProfitPrice=signal.take_profit,
-                stopLossPrice=signal.stop_loss,
-            )
-            for order in bracket:
-                ib.placeOrder(contract, order)
-
-            ib.disconnect()
-        except Exception as exc:  # noqa: BLE001
-            logger.error("Fallo al colocar bracket order real para %s: %s", signal.symbol, exc)
-
-    def _close_ibkr_position(self, symbol: str) -> None:
-        try:
-            from ib_insync import IB, MarketOrder, Stock, ContFuture
-
-            ib = IB()
-            ib.connect(
-                os.getenv("IBKR_HOST", "127.0.0.1"), 7496,
-                clientId=int(os.getenv("IBKR_CLIENT_ID", "1")), timeout=4,
-            )
-            positions = [p for p in ib.positions() if p.contract.symbol == symbol]
-            for p in positions:
-                action = "SELL" if p.position > 0 else "BUY"
-                ib.placeOrder(p.contract, MarketOrder(action, abs(p.position)))
-            ib.disconnect()
-        except Exception as exc:  # noqa: BLE001
-            logger.error("Fallo al cerrar posición real de %s: %s", symbol, exc)

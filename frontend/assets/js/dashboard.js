@@ -166,8 +166,35 @@ async function sendAiQuestion() {
   }
 }
 
+function getSelectedBroker() {
+  return localStorage.getItem("tradingai_broker") || "ibkr";
+}
+
+function setSelectedBroker(broker) {
+  localStorage.setItem("tradingai_broker", broker);
+  document.querySelectorAll(".broker-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.broker === broker);
+  });
+}
+
+async function loadBrokerSelector() {
+  const statusEl = document.getElementById("broker-status");
+  try {
+    const res = await fetch("/api/brokers");
+    const data = await res.json();
+    document.querySelectorAll(".broker-btn").forEach((btn) => {
+      const brokerStatus = data.status[btn.dataset.broker] || "unknown";
+      btn.dataset.status = brokerStatus;
+    });
+    statusEl.textContent = `IBKR: ${data.status.ibkr} · Alpaca: ${data.status.alpaca}`;
+  } catch (e) {
+    statusEl.textContent = "No se pudo consultar el estado de los brokers.";
+  }
+  setSelectedBroker(getSelectedBroker());
+}
+
 async function loadStats() {
-  const el = document.getElementById("view-stats");
+  const el = document.getElementById("stats-dynamic");
   el.innerHTML = `<div class="text-dim">Cargando estadísticas…</div>`;
   try {
     const userId = localStorage.getItem("tradingai_user_id");
@@ -212,6 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("ai-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendAiQuestion();
   });
+
+  document.querySelectorAll(".broker-btn").forEach((btn) => {
+    btn.addEventListener("click", () => setSelectedBroker(btn.dataset.broker));
+  });
+  loadBrokerSelector();
 });
 
 window.addEventListener("tradingai:signals", (e) => {
