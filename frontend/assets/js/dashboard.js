@@ -10,9 +10,16 @@ const TV_SYMBOLS = {
   NVDA: "NASDAQ:NVDA",
   AAPL: "NASDAQ:AAPL",
   TSLA: "NASDAQ:TSLA",
+  MSFT: "NASDAQ:MSFT",
+  GOOGL: "NASDAQ:GOOGL",
+  META: "NASDAQ:META",
+  AMZN: "NASDAQ:AMZN",
+  NFLX: "NASDAQ:NFLX",
   BTC: "BITSTAMP:BTCUSD",
   ETH: "BITSTAMP:ETHUSD",
 };
+
+const WATCHLIST_SYMBOLS = Object.keys(TV_SYMBOLS);
 
 let currentSymbol = "NQ";
 let currentInterval = "5";
@@ -42,6 +49,29 @@ function setSymbol(symbol) {
   renderChart();
   renderSignalPanel();
   loadNews();
+  syncSymbolControls();
+}
+
+function syncSymbolControls() {
+  const select = document.getElementById("symbol-select");
+  if (select) select.value = currentSymbol;
+
+  document.querySelectorAll(".nav-symbol-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.symbol === currentSymbol);
+  });
+  document.querySelectorAll(".watchlist-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.symbol === currentSymbol);
+  });
+}
+
+function renderWatchlist() {
+  const el = document.getElementById("watchlist");
+  el.innerHTML = WATCHLIST_SYMBOLS.map((sym) => `
+    <button class="watchlist-btn ${sym === currentSymbol ? "active" : ""}" data-symbol="${sym}" title="${sym}">${sym}</button>
+  `).join("");
+  el.querySelectorAll(".watchlist-btn").forEach((btn) => {
+    btn.addEventListener("click", () => setSymbol(btn.dataset.symbol));
+  });
 }
 
 function setInterval_(interval, btn) {
@@ -227,8 +257,13 @@ async function loadStats() {
 document.addEventListener("DOMContentLoaded", () => {
   renderChart();
   renderSignalPanel();
+  renderWatchlist();
+  syncSymbolControls();
 
   document.getElementById("symbol-select").addEventListener("change", (e) => setSymbol(e.target.value));
+  document.querySelectorAll(".nav-symbol-btn").forEach((btn) => {
+    btn.addEventListener("click", () => setSymbol(btn.dataset.symbol));
+  });
   document.querySelectorAll(".tf-btn").forEach((btn) => {
     btn.addEventListener("click", () => setInterval_(btn.dataset.interval, btn));
   });

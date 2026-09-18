@@ -16,6 +16,11 @@ SEARCH_TERMS = {
     "NVDA": "Nvidia stock",
     "AAPL": "Apple stock",
     "TSLA": "Tesla stock",
+    "MSFT": "Microsoft stock",
+    "GOOGL": "Google Alphabet stock",
+    "META": "Meta Platforms stock",
+    "AMZN": "Amazon stock",
+    "NFLX": "Netflix stock",
     "BTC": "Bitcoin",
     "ETH": "Ethereum",
 }

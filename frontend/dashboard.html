@@ -11,20 +11,29 @@
 
 <div class="top-header">
   <div class="logo">Trading<span>AI</span> Pro</div>
-  <nav style="display:flex;gap:16px;">
+  <nav style="display:flex;gap:16px;align-items:center;">
     <a href="index.html" class="text-dim">Inicio</a>
     <a href="autotrade.html" class="text-dim">Auto Trade</a>
+    <div class="nav-symbols" id="nav-symbols">
+      <button class="nav-symbol-btn" data-symbol="MSFT">MSFT</button>
+      <button class="nav-symbol-btn" data-symbol="GOOGL">GOOGL</button>
+      <button class="nav-symbol-btn" data-symbol="META">META</button>
+      <button class="nav-symbol-btn" data-symbol="AMZN">AMZN</button>
+      <button class="nav-symbol-btn" data-symbol="NFLX">NFLX</button>
+    </div>
   </nav>
 </div>
 
 <div class="dash-layout">
-  <!-- Columna izquierda: sidebar de iconos -->
+  <!-- Columna izquierda: sidebar de iconos + watchlist -->
   <div class="sidebar">
     <div class="sb-icon active" title="Gráfico">📈</div>
     <div class="sb-icon" title="Señales">⚡</div>
     <div class="sb-icon" title="Noticias">📰</div>
     <div class="sb-icon" title="IA">🧠</div>
     <div class="sb-icon" title="Configuración">⚙️</div>
+    <div class="sb-separator"></div>
+    <div class="watchlist" id="watchlist"></div>
   </div>
 
   <!-- Centro: gráfico -->
@@ -37,6 +46,11 @@
         <option value="NVDA">NVDA</option>
         <option value="AAPL">AAPL</option>
         <option value="TSLA">TSLA</option>
+        <option value="MSFT">MSFT</option>
+        <option value="GOOGL">GOOGL</option>
+        <option value="META">META</option>
+        <option value="AMZN">AMZN</option>
+        <option value="NFLX">NFLX</option>
         <option value="BTC">BTC</option>
         <option value="ETH">ETH</option>
       </select>

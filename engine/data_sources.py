@@ -28,6 +28,11 @@ SYMBOLS = {
     "NVDA": {"class": "stock",  "yf_ticker": "NVDA",   "multiplier": 1,  "tv": "NASDAQ:NVDA"},
     "AAPL": {"class": "stock",  "yf_ticker": "AAPL",   "multiplier": 1,  "tv": "NASDAQ:AAPL"},
     "TSLA": {"class": "stock",  "yf_ticker": "TSLA",   "multiplier": 1,  "tv": "NASDAQ:TSLA"},
+    "MSFT": {"class": "stock",  "yf_ticker": "MSFT",   "multiplier": 1,  "tv": "NASDAQ:MSFT"},
+    "GOOGL":{"class": "stock",  "yf_ticker": "GOOGL",  "multiplier": 1,  "tv": "NASDAQ:GOOGL"},
+    "META": {"class": "stock",  "yf_ticker": "META",   "multiplier": 1,  "tv": "NASDAQ:META"},
+    "AMZN": {"class": "stock",  "yf_ticker": "AMZN",   "multiplier": 1,  "tv": "NASDAQ:AMZN"},
+    "NFLX": {"class": "stock",  "yf_ticker": "NFLX",   "multiplier": 1,  "tv": "NASDAQ:NFLX"},
     "BTC":  {"class": "crypto", "binance": "BTCUSDT",  "multiplier": 1,  "tv": "BITSTAMP:BTCUSD"},
     "ETH":  {"class": "crypto", "binance": "ETHUSDT",  "multiplier": 1,  "tv": "BITSTAMP:ETHUSD"},
 }

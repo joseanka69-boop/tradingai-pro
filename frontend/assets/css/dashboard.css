@@ -1,11 +1,11 @@
 /* TradingAI Pro — layout del dashboard (3 columnas) */
 .dash-layout {
   display: grid;
-  grid-template-columns: 52px 1fr 280px;
+  grid-template-columns: 64px 1fr 280px;
   height: calc(100vh - 52px);
 }
 
-/* Columna izquierda: sidebar de iconos */
+/* Columna izquierda: sidebar de iconos + watchlist */
 .sidebar {
   background: var(--bg-alt);
   border-right: 1px solid var(--border);
@@ -14,6 +14,7 @@
   align-items: center;
   padding: 12px 0;
   gap: 8px;
+  min-height: 0;
 }
 .sidebar .sb-icon {
   width: 36px; height: 36px;
@@ -22,7 +23,53 @@
   color: var(--text-dim);
   cursor: pointer;
   font-size: 18px;
+  flex-shrink: 0;
 }
+
+.sb-separator {
+  width: 32px;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+.watchlist {
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px;
+}
+.watchlist-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 6px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.2;
+}
+.watchlist-btn:hover { background: var(--bg-card); color: var(--text); }
+.watchlist-btn.active { background: var(--accent); color: #fff; }
+
+/* Botones de acceso rápido en el nav superior */
+.nav-symbols { display: flex; gap: 6px; }
+.nav-symbol-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.nav-symbol-btn:hover { color: var(--text); }
+.nav-symbol-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .sidebar .sb-icon:hover, .sidebar .sb-icon.active { background: var(--bg-card); color: var(--accent); }
 
 /* Centro: gráfico + timeframes */
