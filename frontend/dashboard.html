@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — TradingAI Pro</title>
+<link rel="stylesheet" href="assets/css/main.css" />
+<link rel="stylesheet" href="assets/css/dashboard.css" />
+</head>
+<body>
+
+<div class="top-header">
+  <div class="logo">Trading<span>AI</span> Pro</div>
+  <nav style="display:flex;gap:16px;">
+    <a href="index.html" class="text-dim">Inicio</a>
+    <a href="autotrade.html" class="text-dim">Auto Trade</a>
+  </nav>
+</div>
+
+<div class="dash-layout">
+  <!-- Columna izquierda: sidebar de iconos -->
+  <div class="sidebar">
+    <div class="sb-icon active" title="Gráfico">📈</div>
+    <div class="sb-icon" title="Señales">⚡</div>
+    <div class="sb-icon" title="Noticias">📰</div>
+    <div class="sb-icon" title="IA">🧠</div>
+    <div class="sb-icon" title="Configuración">⚙️</div>
+  </div>
+
+  <!-- Centro: gráfico -->
+  <div class="chart-area">
+    <div class="timeframe-bar">
+      <select id="symbol-select" class="symbol-select">
+        <option value="NQ">NQ</option>
+        <option value="MNQ">MNQ</option>
+        <option value="AMD">AMD</option>
+        <option value="NVDA">NVDA</option>
+        <option value="AAPL">AAPL</option>
+        <option value="TSLA">TSLA</option>
+        <option value="BTC">BTC</option>
+        <option value="ETH">ETH</option>
+      </select>
+      <button class="tf-btn" data-interval="1">1m</button>
+      <button class="tf-btn active" data-interval="5">5m</button>
+      <button class="tf-btn" data-interval="15">15m</button>
+      <button class="tf-btn" data-interval="60">1h</button>
+      <button class="tf-btn" data-interval="D">1D</button>
+    </div>
+    <div id="tv-chart"></div>
+  </div>
+
+  <!-- Columna derecha: panel de señales/noticias/IA/stats -->
+  <div class="side-panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" data-tab="signals">Señales</div>
+      <div class="panel-tab" data-tab="news">Noticias</div>
+      <div class="panel-tab" data-tab="ai">IA</div>
+      <div class="panel-tab" data-tab="stats">Stats</div>
+    </div>
+    <div class="panel-content">
+      <div class="panel-view active" id="view-signals"></div>
+      <div class="panel-view" id="view-news"></div>
+      <div class="panel-view" id="view-ai">
+        <div class="ai-chat">
+          <div class="ai-messages" id="ai-messages">
+            <div class="ai-msg assistant">Hola, soy el analista IA de TradingAI Pro. Pregúntame sobre el instrumento actual.</div>
+          </div>
+          <div class="ai-input-row">
+            <input type="text" id="ai-input" placeholder="Pregúntale a Claude AI…" />
+            <button class="btn btn-primary" id="ai-send">➤</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-view" id="view-stats"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script src="assets/js/websocket.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>

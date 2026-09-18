@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es" data-lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TradingAI Pro — Trading algorítmico con IA</title>
+<link rel="stylesheet" href="assets/css/main.css" />
+<style>
+  .hero {
+    padding: 100px 24px 60px;
+    text-align: center;
+    background: radial-gradient(ellipse at top, rgba(59,130,246,0.15), transparent 60%);
+  }
+  .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p.subtitle { font-size: 18px; color: var(--text-dim); max-width: 640px; margin: 0 auto 32px; }
+  .hero-actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 48px; }
+  .hero-stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .hero-stats .stat-num { font-size: 32px; font-weight: 800; color: var(--accent-2); }
+  .hero-stats .stat-label { font-size: 13px; color: var(--text-dim); }
+
+  .ticker-bar {
+    display: flex; gap: 32px; overflow-x: auto;
+    padding: 14px 24px; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .ticker-item { display: flex; gap: 8px; align-items: baseline; white-space: nowrap; font-size: 14px; }
+  .ticker-item .sym { font-weight: 700; }
+  .ticker-item .chg-up { color: var(--accent-2); }
+  .ticker-item .chg-down { color: var(--danger); }
+
+  section { padding: 72px 0; }
+  section h2 { font-size: 32px; text-align: center; margin-bottom: 12px; }
+  section p.section-sub { text-align: center; color: var(--text-dim); max-width: 560px; margin: 0 auto 48px; }
+
+  .signal-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .signal-row:last-child { border-bottom: none; }
+
+  .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+  .feature-card h3 { margin: 0 0 8px; font-size: 17px; }
+  .feature-card p { color: var(--text-dim); font-size: 14px; margin: 0; }
+
+  .trial-banner {
+    background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.15));
+    border: 1px solid var(--accent-2);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .trial-banner .tag { display:inline-block; background: var(--accent-2); color:#04210f; font-weight:800; padding:6px 16px; border-radius:999px; margin-bottom:16px; font-size:13px; }
+
+  .pricing-card { text-align: center; position: relative; }
+  .pricing-card.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .pricing-card .price { font-size: 36px; font-weight: 800; margin: 12px 0; }
+  .pricing-card .price small { font-size: 14px; color: var(--text-dim); font-weight: 400; }
+  .pricing-card ul { list-style: none; padding: 0; text-align: left; margin: 20px 0; color: var(--text-dim); font-size: 14px; }
+  .pricing-card ul li { padding: 6px 0; }
+  .pricing-card ul li:before { content: "✓ "; color: var(--accent-2); }
+  .addon-note { text-align: center; margin-top: 24px; color: var(--text-dim); font-size: 14px; }
+
+  .testimonial p { font-style: italic; color: var(--text); }
+  .testimonial .author { margin-top: 12px; font-size: 13px; color: var(--text-dim); font-style: normal; }
+
+  .faq-item summary { cursor: pointer; font-weight: 600; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .faq-item p { color: var(--text-dim); padding: 8px 0 16px; margin: 0; }
+
+  footer { padding: 40px 24px; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); font-size: 13px; }
+
+  [data-i18n-hide-es] { display: none; }
+  html[data-lang="en"] [data-i18n-hide-en] { display: none; }
+  html[data-lang="en"] [data-i18n-hide-es] { display: inline; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">Trading<span>AI</span> Pro</div>
+  <nav>
+    <a href="#features" data-i18n-hide-en>Funciones</a>
+    <a href="#features" data-i18n-hide-es>Features</a>
+    <a href="#pricing" data-i18n-hide-en>Precios</a>
+    <a href="#pricing" data-i18n-hide-es>Pricing</a>
+    <a href="#faq">FAQ</a>
+    <button class="btn-lang" id="lang-toggle">EN</button>
+    <a class="btn btn-primary" href="dashboard.html" data-i18n-hide-en>Entrar al Dashboard</a>
+    <a class="btn btn-primary" href="dashboard.html" data-i18n-hide-es>Go to Dashboard</a>
+  </nav>
+</div>
+
+<div class="ticker-bar" id="ticker-bar">
+  <div class="ticker-item text-dim">Cargando precios…</div>
+</div>
+
+<section class="hero">
+  <h1 data-i18n-hide-en>Trading algorítmico<br>potenciado por <span>IA</span></h1>
+  <h1 data-i18n-hide-es>Algorithmic trading<br>powered by <span>AI</span></h1>
+  <p class="subtitle" data-i18n-hide-en>
+    Señales en tiempo real con triple certificación estadística, Auto Trade en modo
+    simulado o real vía IBKR, alertas por WhatsApp y análisis con Claude AI.
+  </p>
+  <p class="subtitle" data-i18n-hide-es>
+    Real-time signals with triple statistical confirmation, Auto Trade in paper or
+    real mode via IBKR, WhatsApp alerts and Claude AI analysis.
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="dashboard.html" data-i18n-hide-en>Ver Dashboard en vivo</a>
+    <a class="btn btn-primary" href="dashboard.html" data-i18n-hide-es>View live Dashboard</a>
+    <a class="btn btn-ghost" href="#pricing" data-i18n-hide-en>Ver precios</a>
+    <a class="btn btn-ghost" href="#pricing" data-i18n-hide-es>View pricing</a>
+  </div>
+  <div class="hero-stats">
+    <div><div class="stat-num">76.4%</div><div class="stat-label" data-i18n-hide-en>Win rate histórico</div><div class="stat-label" data-i18n-hide-es>Historical win rate</div></div>
+    <div><div class="stat-num">8</div><div class="stat-label" data-i18n-hide-en>Instrumentos cubiertos</div><div class="stat-label" data-i18n-hide-es>Instruments covered</div></div>
+    <div><div class="stat-num">24/7</div><div class="stat-label" data-i18n-hide-en>Escaneo continuo</div><div class="stat-label" data-i18n-hide-es>Continuous scanning</div></div>
+  </div>
+</section>
+
+<section id="signals-demo">
+  <div class="container">
+    <h2 data-i18n-hide-en>Señales en vivo</h2>
+    <h2 data-i18n-hide-es>Live signals</h2>
+    <p class="section-sub" data-i18n-hide-en>Ejemplo en tiempo real del motor de señales de TradingAI Pro.</p>
+    <p class="section-sub" data-i18n-hide-es>Live example of the TradingAI Pro signal engine.</p>
+    <div class="card" id="signals-demo-list">
+      <div class="text-dim text-center">Cargando señales…</div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="container">
+    <h2 data-i18n-hide-en>Todo lo que necesitas para operar</h2>
+    <h2 data-i18n-hide-es>Everything you need to trade</h2>
+    <div class="grid grid-3">
+      <div class="card feature-card">
+        <div class="icon">📊</div>
+        <h3 data-i18n-hide-en>Motor de señales</h3><h3 data-i18n-hide-es>Signal engine</h3>
+        <p data-i18n-hide-en>Z-Score, RSI, Bandas de Bollinger y ADX combinados en una lógica de triple certificación.</p>
+        <p data-i18n-hide-es>Z-Score, RSI, Bollinger Bands and ADX combined in a triple-confirmation logic.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="icon">🤖</div>
+        <h3 data-i18n-hide-en>Auto Trade</h3><h3 data-i18n-hide-es>Auto Trade</h3>
+        <p data-i18n-hide-en>Modo simulado (Paper) gratuito o modo real conectado a tu cuenta de IBKR.</p>
+        <p data-i18n-hide-es>Free simulated (Paper) mode or real mode connected to your IBKR account.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="icon">💬</div>
+        <h3 data-i18n-hide-en>Alertas por WhatsApp</h3><h3 data-i18n-hide-es>WhatsApp alerts</h3>
+        <p data-i18n-hide-en>Recibe cada entrada y salida directamente en tu WhatsApp, sin revisar la pantalla.</p>
+        <p data-i18n-hide-es>Get every entry and exit straight to your WhatsApp, no screen watching needed.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="icon">🧠</div>
+        <h3 data-i18n-hide-en>Análisis con IA</h3><h3 data-i18n-hide-es>AI analysis</h3>
+        <p data-i18n-hide-en>Pregúntale a Claude AI sobre el contexto de cualquier señal en lenguaje natural.</p>
+        <p data-i18n-hide-es>Ask Claude AI about the context of any signal in natural language.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="icon">📰</div>
+        <h3 data-i18n-hide-en>Noticias en vivo</h3><h3 data-i18n-hide-es>Live news</h3>
+        <p data-i18n-hide-en>Titulares relevantes por instrumento para entender qué mueve el precio.</p>
+        <p data-i18n-hide-es>Relevant headlines per instrument to understand what's moving the price.</p>
+      </div>
+      <div class="card feature-card">
+        <div class="icon">📈</div>
+        <h3 data-i18n-hide-en>Gráfico profesional</h3><h3 data-i18n-hide-es>Professional chart</h3>
+        <p data-i18n-hide-en>Gráficos TradingView integrados con los indicadores del motor de señales.</p>
+        <p data-i18n-hide-es>Integrated TradingView charts with the signal engine's indicators.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="trial">
+  <div class="container">
+    <div class="trial-banner">
+      <div class="tag" data-i18n-hide-en>1 MES GRATIS</div>
+      <div class="tag" data-i18n-hide-es>1 MONTH FREE</div>
+      <h2 style="margin-top:0" data-i18n-hide-en>Prueba Auto Trade sin riesgo</h2>
+      <h2 style="margin-top:0" data-i18n-hide-es>Try Auto Trade risk-free</h2>
+      <p class="text-dim" data-i18n-hide-en>30 días de Auto Trade en modo simulado, con capital ficticio y resultados reales del mercado.</p>
+      <p class="text-dim" data-i18n-hide-es>30 days of Auto Trade in simulated mode, with fictional capital and real market results.</p>
+      <a class="btn btn-primary" href="autotrade.html" data-i18n-hide-en>Activar mi trial gratis</a>
+      <a class="btn btn-primary" href="autotrade.html" data-i18n-hide-es>Activate my free trial</a>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="container">
+    <h2 data-i18n-hide-en>Planes y precios</h2>
+    <h2 data-i18n-hide-es>Plans & pricing</h2>
+    <p class="section-sub" data-i18n-hide-en>Cancela cuando quieras. Sin contratos a largo plazo.</p>
+    <p class="section-sub" data-i18n-hide-es>Cancel anytime. No long-term contracts.</p>
+    <div class="grid grid-3">
+      <div class="card pricing-card">
+        <h3>Starter</h3>
+        <div class="price">$89<small data-i18n-hide-en>/mes</small><small data-i18n-hide-es>/mo</small></div>
+        <p class="text-dim" data-i18n-hide-en>Facturación mensual</p>
+        <p class="text-dim" data-i18n-hide-es>Monthly billing</p>
+        <ul>
+          <li data-i18n-hide-en>Señales en tiempo real</li><li data-i18n-hide-es>Real-time signals</li>
+          <li data-i18n-hide-en>8 instrumentos</li><li data-i18n-hide-es>8 instruments</li>
+          <li data-i18n-hide-en>Dashboard + gráficos</li><li data-i18n-hide-es>Dashboard + charts</li>
+        </ul>
+        <a class="btn btn-ghost" href="dashboard.html" style="width:100%" data-i18n-hide-en>Elegir Starter</a>
+        <a class="btn btn-ghost" href="dashboard.html" style="width:100%" data-i18n-hide-es>Choose Starter</a>
+      </div>
+      <div class="card pricing-card featured">
+        <h3>Pro</h3>
+        <div class="price">$79<small data-i18n-hide-en>/mes</small><small data-i18n-hide-es>/mo</small></div>
+        <p class="text-dim" data-i18n-hide-en>Facturado cada 6 meses</p>
+        <p class="text-dim" data-i18n-hide-es>Billed every 6 months</p>
+        <ul>
+          <li data-i18n-hide-en>Todo lo de Starter</li><li data-i18n-hide-es>Everything in Starter</li>
+          <li data-i18n-hide-en>Análisis con IA ilimitado</li><li data-i18n-hide-es>Unlimited AI analysis</li>
+          <li data-i18n-hide-en>Alertas por WhatsApp</li><li data-i18n-hide-es>WhatsApp alerts</li>
+        </ul>
+        <a class="btn btn-primary" href="dashboard.html" style="width:100%" data-i18n-hide-en>Elegir Pro</a>
+        <a class="btn btn-primary" href="dashboard.html" style="width:100%" data-i18n-hide-es>Choose Pro</a>
+      </div>
+      <div class="card pricing-card">
+        <h3>Premium</h3>
+        <div class="price">$69<small data-i18n-hide-en>/mes</small><small data-i18n-hide-es>/mo</small></div>
+        <p class="text-dim" data-i18n-hide-en>Facturado anualmente</p>
+        <p class="text-dim" data-i18n-hide-es>Billed annually</p>
+        <ul>
+          <li data-i18n-hide-en>Todo lo de Pro</li><li data-i18n-hide-es>Everything in Pro</li>
+          <li data-i18n-hide-en>Soporte prioritario</li><li data-i18n-hide-es>Priority support</li>
+          <li data-i18n-hide-en>Mejor precio anual</li><li data-i18n-hide-es>Best annual price</li>
+        </ul>
+        <a class="btn btn-ghost" href="dashboard.html" style="width:100%" data-i18n-hide-en>Elegir Premium</a>
+        <a class="btn btn-ghost" href="dashboard.html" style="width:100%" data-i18n-hide-es>Choose Premium</a>
+      </div>
+    </div>
+    <p class="addon-note" data-i18n-hide-en>Add-on Auto Trade disponible en cualquier plan: <strong>+$35/mes</strong></p>
+    <p class="addon-note" data-i18n-hide-es>Auto Trade add-on available on any plan: <strong>+$35/mo</strong></p>
+  </div>
+</section>
+
+<section id="results">
+  <div class="container">
+    <h2 data-i18n-hide-en>Resultados probados</h2>
+    <h2 data-i18n-hide-es>Proven results</h2>
+    <div class="grid grid-4 text-center">
+      <div class="card"><div class="stat-num" style="font-size:28px;color:var(--accent-2)">76.4%</div><div class="text-dim" data-i18n-hide-en>Win rate</div><div class="text-dim" data-i18n-hide-es>Win rate</div></div>
+      <div class="card"><div class="stat-num" style="font-size:28px;color:var(--accent-2)">1.8x</div><div class="text-dim" data-i18n-hide-en>Profit factor</div><div class="text-dim" data-i18n-hide-es>Profit factor</div></div>
+      <div class="card"><div class="stat-num" style="font-size:28px;color:var(--accent-2)">+12,400</div><div class="text-dim" data-i18n-hide-en>Señales generadas</div><div class="text-dim" data-i18n-hide-es>Signals generated</div></div>
+      <div class="card"><div class="stat-num" style="font-size:28px;color:var(--accent-2)">2.5x ATR</div><div class="text-dim" data-i18n-hide-en>Stop dinámico</div><div class="text-dim" data-i18n-hide-es>Dynamic stop</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials">
+  <div class="container">
+    <h2 data-i18n-hide-en>Lo que dicen nuestros traders</h2>
+    <h2 data-i18n-hide-es>What our traders say</h2>
+    <div class="grid grid-3">
+      <div class="card testimonial">
+        <p data-i18n-hide-en>"El Auto Trade en modo Paper me dejó probar la estrategia un mes completo sin arriesgar capital."</p>
+        <p data-i18n-hide-es>"Paper mode Auto Trade let me test the strategy for a full month without risking capital."</p>
+        <div class="author">— Carlos M.</div>
+      </div>
+      <div class="card testimonial">
+        <p data-i18n-hide-en>"Las alertas de WhatsApp son instantáneas. Ya no necesito estar pegado a la pantalla."</p>
+        <p data-i18n-hide-es>"WhatsApp alerts are instant. I no longer need to stay glued to the screen."</p>
+        <div class="author">— Andrea R.</div>
+      </div>
+      <div class="card testimonial">
+        <p data-i18n-hide-en>"El análisis con Claude AI me ayuda a entender el contexto detrás de cada señal."</p>
+        <p data-i18n-hide-es>"Claude AI analysis helps me understand the context behind every signal."</p>
+        <div class="author">— Luis F.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <h2>FAQ</h2>
+    <details class="faq-item">
+      <summary data-i18n-hide-en>¿Necesito una cuenta de IBKR para empezar?</summary>
+      <summary data-i18n-hide-es>Do I need an IBKR account to start?</summary>
+      <p data-i18n-hide-en>No. El modo Paper (simulado) funciona sin conexión a ningún bróker — solo el modo Real requiere IBKR.</p>
+      <p data-i18n-hide-es>No. Paper (simulated) mode works without any broker connection — only Real mode requires IBKR.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n-hide-en>¿Puedo cancelar en cualquier momento?</summary>
+      <summary data-i18n-hide-es>Can I cancel anytime?</summary>
+      <p data-i18n-hide-en>Sí, todos los planes son sin permanencia mínima.</p>
+      <p data-i18n-hide-es>Yes, all plans have no minimum commitment.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n-hide-en>¿Qué instrumentos puedo operar?</summary>
+      <summary data-i18n-hide-es>What instruments can I trade?</summary>
+      <p data-i18n-hide-en>Futuros NQ/MNQ, acciones (AMD, NVDA, AAPL, TSLA) y crypto (BTC, ETH).</p>
+      <p data-i18n-hide-es>NQ/MNQ futures, stocks (AMD, NVDA, AAPL, TSLA) and crypto (BTC, ETH).</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p data-i18n-hide-en>TradingAI Pro es una plataforma con fines educativos e informativos. El trading conlleva riesgo de pérdida de capital.</p>
+    <p data-i18n-hide-es>TradingAI Pro is a platform for educational and informational purposes. Trading involves risk of capital loss.</p>
+    <p>© 2026 TradingAI Pro</p>
+  </div>
+</footer>
+
+<script>
+  // --- Toggle de idioma ES/EN ---
+  const langToggle = document.getElementById('lang-toggle');
+  const htmlEl = document.documentElement;
+  langToggle.addEventListener('click', () => {
+    const next = htmlEl.getAttribute('data-lang') === 'es' ? 'en' : 'es';
+    htmlEl.setAttribute('data-lang', next);
+    langToggle.textContent = next === 'es' ? 'EN' : 'ES';
+  });
+
+  // --- Ticker de precios en vivo ---
+  async function loadTicker() {
+    try {
+      const res = await fetch('/api/signals');
+      const data = await res.json();
+      const bar = document.getElementById('ticker-bar');
+      const symbols = Object.keys(data);
+      if (symbols.length === 0) { return; }
+      bar.innerHTML = symbols.map(sym => {
+        const s = data[sym];
+        const cls = s.direction === 'LONG' ? 'chg-up' : (s.direction === 'SHORT' ? 'chg-down' : '');
+        return `<div class="ticker-item"><span class="sym">${sym}</span><span class="${cls}">${s.price}</span></div>`;
+      }).join('');
+    } catch (e) { /* backend aún no disponible */ }
+  }
+
+  // --- Señales demo en vivo ---
+  async function loadSignalsDemo() {
+    try {
+      const res = await fetch('/api/signals');
+      const data = await res.json();
+      const list = document.getElementById('signals-demo-list');
+      const symbols = Object.keys(data);
+      if (symbols.length === 0) {
+        list.innerHTML = '<div class="text-dim text-center">Sin señales activas por ahora.</div>';
+        return;
+      }
+      list.innerHTML = symbols.map(sym => {
+        const s = data[sym];
+        const badgeClass = s.direction === 'LONG' ? 'badge-long' : (s.direction === 'SHORT' ? 'badge-short' : 'badge-neutral');
+        return `<div class="signal-row">
+          <div><strong>${sym}</strong> <span class="text-dim">${s.price}</span></div>
+          <div class="badge ${badgeClass}">${s.direction}</div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      document.getElementById('signals-demo-list').innerHTML = '<div class="text-dim text-center">Backend no disponible.</div>';
+    }
+  }
+
+  loadTicker();
+  loadSignalsDemo();
+  setInterval(loadTicker, 30000);
+  setInterval(loadSignalsDemo, 30000);
+</script>
+
+</body>
+</html>

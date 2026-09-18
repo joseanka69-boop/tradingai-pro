@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auto Trade — TradingAI Pro</title>
+<link rel="stylesheet" href="assets/css/main.css" />
+<style>
+  .at-layout { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+  .at-section { margin-bottom: 32px; }
+  .at-section h2 { font-size: 18px; margin-bottom: 12px; }
+  #register-form label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  #register-form input[type="text"], #register-form input[type="number"] {
+    width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 14px;
+  }
+  #equity-canvas { width: 100%; height: 160px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <div class="logo">Trading<span>AI</span> Pro</div>
+  <nav style="display:flex;gap:16px;">
+    <a href="index.html" class="text-dim">Inicio</a>
+    <a href="dashboard.html" class="text-dim">Dashboard</a>
+  </nav>
+</div>
+
+<div class="at-layout">
+
+  <div id="register-section" class="at-section">
+    <h2>Activa tu Auto Trade — 1 mes gratis en modo Paper</h2>
+    <form id="register-form" class="card">
+      <label for="phone-input">Teléfono de WhatsApp (formato +1XXXXXXXXXX)</label>
+      <input type="text" id="phone-input" placeholder="+15551234567" required />
+
+      <label for="qty-input">Cantidad por señal</label>
+      <input type="number" id="qty-input" value="1" min="1" required />
+
+      <label>Símbolos a operar</label>
+      <div id="symbols-checkboxes" style="margin-bottom:20px;"></div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;">Activar Auto Trade</button>
+    </form>
+  </div>
+
+  <div id="panel-section" class="at-section" style="display:none;">
+    <div class="at-section">
+      <h2>Estado</h2>
+      <div id="status-box"></div>
+    </div>
+
+    <div class="at-section">
+      <h2>Posiciones abiertas</h2>
+      <div id="open-positions"></div>
+    </div>
+
+    <div class="at-section">
+      <h2>Estadísticas</h2>
+      <div class="stats-grid" id="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+      <canvas id="equity-canvas" width="800" height="160"></canvas>
+    </div>
+
+    <div class="at-section">
+      <h2>Historial de trades</h2>
+      <div class="card" id="history-table"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/js/websocket.js"></script>
+<script src="assets/js/autotrade.js"></script>
+</body>
+</html>

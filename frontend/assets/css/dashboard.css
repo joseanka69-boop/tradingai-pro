@@ -1,0 +1,102 @@
+/* TradingAI Pro — layout del dashboard (3 columnas) */
+.dash-layout {
+  display: grid;
+  grid-template-columns: 52px 1fr 280px;
+  height: calc(100vh - 52px);
+}
+
+/* Columna izquierda: sidebar de iconos */
+.sidebar {
+  background: var(--bg-alt);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 8px;
+}
+.sidebar .sb-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 18px;
+}
+.sidebar .sb-icon:hover, .sidebar .sb-icon.active { background: var(--bg-card); color: var(--accent); }
+
+/* Centro: gráfico + timeframes */
+.chart-area { display: flex; flex-direction: column; min-width: 0; }
+.timeframe-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+.symbol-select {
+  background: var(--bg-card); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-weight: 600; font-size: 14px;
+}
+.tf-btn {
+  background: transparent; border: none; color: var(--text-dim);
+  padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.tf-btn.active, .tf-btn:hover { background: var(--bg-card); color: var(--text); }
+#tv-chart { flex: 1; min-height: 0; }
+
+/* Columna derecha: panel de señales/noticias/IA/stats */
+.side-panel {
+  background: var(--bg-alt);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.panel-tab {
+  flex: 1; text-align: center; padding: 12px 4px;
+  font-size: 12px; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent;
+}
+.panel-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.panel-content { flex: 1; overflow-y: auto; padding: 16px; }
+.panel-view { display: none; }
+.panel-view.active { display: block; }
+
+.indicator-row { margin-bottom: 14px; }
+.indicator-row .label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+.indicator-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.indicator-bar-fill { height: 100%; background: var(--accent); }
+
+.sl-tp-box { display: flex; justify-content: space-between; margin-top: 16px; font-size: 13px; }
+.sl-tp-box .sl { color: var(--danger); }
+.sl-tp-box .tp { color: var(--accent-2); }
+
+.news-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.news-item a { color: var(--text); font-weight: 600; }
+.news-item .meta { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
+
+.ai-chat { display: flex; flex-direction: column; height: 100%; }
+.ai-messages { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+.ai-msg { margin-bottom: 10px; font-size: 13px; }
+.ai-msg.user { color: var(--accent); }
+.ai-msg.assistant { color: var(--text); background: var(--bg-card); padding: 8px 10px; border-radius: 8px; }
+.ai-input-row { display: flex; gap: 6px; }
+.ai-input-row input {
+  flex: 1; background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+  border-radius: 6px; padding: 8px 10px; font-size: 13px;
+}
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.stats-grid .stat-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+.stats-grid .stat-box .val { font-size: 18px; font-weight: 700; }
+.stats-grid .stat-box .lbl { font-size: 11px; color: var(--text-dim); }
+
+.top-header {
+  height: 52px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg-alt);
+}
+.top-header .logo { font-weight: 800; }
+.top-header .logo span { color: var(--accent); }
