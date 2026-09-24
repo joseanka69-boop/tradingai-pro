@@ -272,6 +272,25 @@ input[type=range]{accent-color:var(--long);width:180px}
 .greeks td{text-align:right;font-family:var(--display)}
 .greeks td:first-child{text-align:left;font-family:var(--body)}
 .note{font-size:13px;color:var(--fog);margin-top:12px}
+.volwrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 24px 40px;align-items:start}
+.vpanel{border:1px solid var(--rail);border-radius:12px;background:var(--deck);padding:18px}
+.vpanel h3{font-family:var(--display);font-weight:600;font-size:17px;margin-bottom:12px}
+.vkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.vkpis .k{font-size:12px;color:var(--fog)}
+.vkpis .v{font-family:var(--display);font-weight:600;font-size:19px}
+#ivhv{width:100%;height:230px;display:block}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--fog);margin:10px 0}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.vpanel .read{font-size:14px;color:var(--paper)}
+.oi{display:grid;grid-template-columns:1fr 62px 1fr;gap:3px 8px;align-items:center;margin-bottom:14px}
+.oi .hd{font-size:12px;color:var(--fog)}
+.oi .pb{display:flex;justify-content:flex-end}
+.oi .bar{height:13px;border-radius:2px;min-width:2px;transition:width .4s}
+.oi .pb .bar{background:rgba(255,93,108,.55)} .oi .cb .bar{background:rgba(43,212,180,.55)}
+.oi .pb .bar.wall{background:var(--short)} .oi .cb .bar.wall{background:var(--long)}
+.oi .k{text-align:center;font-family:var(--display);font-weight:600;font-size:13px;color:var(--fog);border-radius:4px;padding:1px 0}
+.oi .k.atm{color:var(--amber)}
+.oi .k.mp{box-shadow:inset 0 0 0 1px var(--amber)}
 
 @media (max-width:1100px){
   .shell{grid-template-columns:1fr}
@@ -281,6 +300,7 @@ input[type=range]{accent-color:var(--long);width:180px}
   .ivpanel{grid-template-columns:repeat(2,1fr)}
   .chain-wrap{grid-template-columns:1fr}
   .stk-wrap{grid-template-columns:1fr}
+  .volwrap{grid-template-columns:1fr}
   .detail{position:static}
   .sigma{grid-template-columns:1fr;gap:20px}
   .work{grid-template-columns:1fr}
@@ -513,6 +533,34 @@ input[type=range]{accent-color:var(--long);width:180px}
       <p class="note">Θ en dólares por día y Vega por cada 1% de volatilidad, por contrato de 100 acciones.</p>
     </aside>
   </div>
+
+  <div class="volwrap">
+    <section class="vpanel" aria-label="Volatilidad implícita contra histórica">
+      <h3>Volatilidad implícita vs histórica</h3>
+      <div class="vkpis">
+        <div><div class="k">IV actual</div><div class="v" id="vIv">—</div></div>
+        <div><div class="k">HV 20 días</div><div class="v" id="vHv">—</div></div>
+        <div><div class="k">Diferencia</div><div class="v" id="vSpread">—</div></div>
+        <div><div class="k">Ratio IV / HV</div><div class="v" id="vRatio">—</div></div>
+      </div>
+      <canvas id="ivhv" aria-hidden="true"></canvas>
+      <div class="legend"><span><i style="background:var(--amber)"></i>Volatilidad implícita (IV)</span><span><i style="background:var(--paper)"></i>Volatilidad histórica (HV 20)</span></div>
+      <p class="read" id="vRead"></p>
+    </section>
+
+    <section class="vpanel" aria-label="Open interest por strike">
+      <h3>Open interest por strike</h3>
+      <div class="vkpis">
+        <div><div class="k">Ratio put/call</div><div class="v" id="oPcr">—</div></div>
+        <div><div class="k">Muro de calls</div><div class="v up" id="oCw">—</div></div>
+        <div><div class="k">Muro de puts</div><div class="v dn" id="oPw">—</div></div>
+        <div><div class="k">Max pain</div><div class="v" id="oMp" style="color:var(--amber)">—</div></div>
+      </div>
+      <div class="oi" id="oiChart"></div>
+      <p class="read" id="oiRead"></p>
+    </section>
+  </div>
+  <p class="note" style="padding:0 24px 32px;margin:0">IV histórica y open interest en modo demostración. Con backend se leen de /api/options/volatility y /api/options/oi (IBKR).</p>
 </div>
 
 </div><!-- /views -->
@@ -1287,6 +1335,87 @@ function bs(S,K,T,s,type){
   const vega = S*npdf(d1)*Math.sqrt(T)/100;
   return {price,delta,gamma,theta,vega};
 }
+/* ── Generador determinista para datos demo estables ── */
+function rng(seed){ let s=0; for (const ch of String(seed)) s=(s*31+ch.charCodeAt(0))>>>0;
+  return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function gauss(r){ const u=Math.max(r(),1e-9), v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+/* ── Historia diaria del subyacente: HV20 y IV ── */
+const VH = {};
+function volHistory(u){
+  if (VH[u.s]) return VH[u.s];
+  const r = rng('vol'+u.s), base = (u.lo+u.hi)/2*0.8, closes=[100], ivs=[];
+  for (let t=1;t<300;t++){
+    const sig = base*(1+0.25*Math.sin(t/37)) + 0.02*gauss(r);
+    closes.push(closes[t-1]*Math.exp(Math.max(sig,.05)/Math.sqrt(252)*gauss(r)));
+  }
+  const hv = closes.map((_,i)=>{ if (i<21) return null;
+    const rets=[]; for (let j=i-19;j<=i;j++) rets.push(Math.log(closes[j]/closes[j-1])); return sd(rets)*Math.sqrt(252); });
+  hv.forEach(v=>ivs.push(v==null?null:v*(1.12+0.06*gauss(r))));
+  // calibra la historia para que la HV actual sea coherente con la IV típica del subyacente
+  const iv0 = u.iv0 || (u.iv0 = u.iv), k = (iv0/1.1)/hv[hv.length-1];
+  return VH[u.s] = {hv:hv.slice(-150).map(v=>v==null?null:v*k), iv:ivs.slice(-150).map(v=>v==null?null:v*k)};
+}
+
+function renderVol(u, iv){
+  const d = volHistory(u), hv = d.hv[d.hv.length-1];
+  const ivs = d.iv.slice(); ivs[ivs.length-1] = iv;
+  const spread = (iv-hv)*100, ratio = iv/hv;
+  $('vIv').textContent = (iv*100).toFixed(1)+'%';
+  $('vHv').textContent = (hv*100).toFixed(1)+'%';
+  $('vSpread').textContent = (spread>=0?'+':'')+spread.toFixed(1)+' pts';
+  $('vSpread').className = 'v '+(spread>=0?'dn':'up');
+  $('vRatio').textContent = ratio.toFixed(2)+'×';
+  $('vRead').textContent = ratio>=1.2
+    ? `La IV está ${spread.toFixed(1)} puntos por encima de lo que realmente se mueve ${u.s}. Las opciones están caras: ventaja para vender prima (spreads de crédito, iron condor, covered calls).`
+    : ratio<=0.9
+    ? `La IV está ${Math.abs(spread).toFixed(1)} puntos por debajo de lo que realmente se mueve ${u.s}. Las opciones están baratas: ventaja para comprarlas (calls, puts o spreads de débito).`
+    : `IV y HV están parecidas: las opciones tienen un precio justo. Decide por dirección, no por volatilidad.`;
+
+  const cv = $('ivhv'), k = canvasCtx(cv); if (!k) return; const {g,w,h} = k;
+  const all = d.hv.concat(ivs).filter(v=>v!=null), lo = Math.min(...all)*0.9, hi = Math.max(...all)*1.08, lw = 40;
+  const y = v => h-18 - (v-lo)/(hi-lo)*(h-26), x = i => lw + i/(ivs.length-1)*(w-lw-8);
+  g.font='11px Barlow, sans-serif'; g.fillStyle='#8497AD'; g.textBaseline='middle';
+  for (let q=0;q<4;q++){ const v = lo+(hi-lo)*q/3; g.strokeStyle='rgba(30,48,72,.8)'; g.beginPath(); g.moveTo(lw,y(v)); g.lineTo(w,y(v)); g.stroke(); g.fillText((v*100).toFixed(0)+'%',0,y(v)); }
+  g.fillText('Hace 150 días',lw,h-6); g.textAlign='right'; g.fillText('Hoy',w,h-6); g.textAlign='left';
+  // zona sombreada donde IV > HV
+  g.fillStyle='rgba(255,181,71,.10)';
+  ivs.forEach((v,i)=>{ const hvv=d.hv[i]; if (v!=null&&hvv!=null&&i>0&&v>hvv){ g.fillRect(x(i-1),y(v),x(i)-x(i-1)+.5,y(hvv)-y(v)); } });
+  const line = (arr,col,wd)=>{ g.strokeStyle=col; g.lineWidth=wd; g.beginPath(); let st=false;
+    arr.forEach((v,i)=>{ if (v==null) return; st? g.lineTo(x(i),y(v)) : (g.moveTo(x(i),y(v)), st=true); }); g.stroke(); };
+  line(d.hv,'#E8EEF5',1.6); line(ivs,'#FFB547',2);
+  g.fillStyle='#FFB547'; g.beginPath(); g.arc(x(ivs.length-1),y(iv),4,0,7); g.fill();
+}
+
+/* ── Open interest por strike ── */
+function renderOI(u, S, strikes, step, atm){
+  const big = ['QQQ','SPY'].includes(u.s) ? 60000 : 18000;
+  const rows = strikes.map(K=>{
+    const r = rng(u.s+oDays+K), round = (K % (step*4) === 0) ? 1.9 : 1;
+    const cb = Math.exp(-((((K-S*1.025)/S)/0.04)**2)), pb = Math.exp(-((((K-S*0.97)/S)/0.045)**2));
+    return {K,
+      c: Math.round(big*cb*round*(0.6+0.8*r())),
+      p: Math.round(big*pb*round*(0.6+0.8*r())*1.05)};
+  });
+  const tc = rows.reduce((a,b)=>a+b.c,0), tp = rows.reduce((a,b)=>a+b.p,0), pcr = tp/tc;
+  const cw = rows.reduce((a,b)=>b.c>a.c?b:a), pw = rows.reduce((a,b)=>b.p>a.p?b:a);
+  const mp = rows.map(X=>({K:X.K, pain: rows.reduce((s,r)=>s + r.c*Math.max(X.K-r.K,0) + r.p*Math.max(r.K-X.K,0),0)}))
+                 .reduce((a,b)=>b.pain<a.pain?b:a).K;
+  const mx = Math.max(...rows.map(r=>Math.max(r.c,r.p)));
+  $('oPcr').textContent = pcr.toFixed(2);
+  $('oCw').textContent = cw.K; $('oPw').textContent = pw.K; $('oMp').textContent = mp;
+  const fmtK = n => n>=1000 ? (n/1000).toFixed(1)+'k' : n;
+  $('oiChart').innerHTML = '<div class="hd" style="text-align:right">Puts</div><div class="hd" style="text-align:center">Strike</div><div class="hd">Calls</div>'
+    + rows.slice().reverse().map(r=>`
+      <div class="pb" title="Puts ${r.K}: ${r.p.toLocaleString('en-US')} contratos"><div class="bar ${r.K===pw.K?'wall':''}" style="width:${r.p/mx*100}%"></div></div>
+      <div class="k ${r.K===atm?'atm':''} ${r.K===mp?'mp':''}">${r.K}</div>
+      <div class="cb" title="Calls ${r.K}: ${r.c.toLocaleString('en-US')} contratos"><div class="bar ${r.K===cw.K?'wall':''}" style="width:${r.c/mx*100}%"></div></div>`).join('');
+  const mood = pcr>1.1 ? 'Hay más puts que calls: el mercado está pagando por protección (posicionamiento defensivo).'
+             : pcr<0.7 ? 'Hay muchos más calls que puts: posicionamiento optimista, a veces excesivo.'
+             : 'Calls y puts están equilibrados: posicionamiento neutral.';
+  $('oiRead').textContent = `${mood} El muro de calls en ${cw.K} (${fmtK(cw.c)} contratos) suele actuar como resistencia y el muro de puts en ${pw.K} (${fmtK(pw.p)}) como soporte. El max pain está en ${mp}: el strike donde más opciones vencerían sin valor, al que algunos traders esperan que el precio se acerque cerca del vencimiento.`;
+}
+
 function spotOf(u){ const w = WATCH.find(x=>x.s===u.s) || (typeof STOCKS!=='undefined' && STOCKS.find(x=>x.s===u.s)); return w ? w.p : u.p; }
 
 (function initOptions(){
@@ -1332,6 +1461,9 @@ function renderOptions(){
       <td class="num ${K>S?'itm':''}" style="text-align:right">${(p.theta*100).toFixed(2)}</td></tr>`;
   }
   $('oChain').innerHTML = rows;
+  const strikes = []; for (let i=-8;i<=8;i++) strikes.push(+(atm+i*step).toFixed(2));
+  renderVol(u, iv);
+  renderOI(u, S, strikes, step, atm);
   $('oChain').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{ oSel=+tr.dataset.k; renderOptions(); });
 
   const c = bs(S,oSel,T,iv,'c'), p = bs(S,oSel,T,iv,'p');
